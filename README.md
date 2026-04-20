@@ -1,90 +1,126 @@
-# VentureGuard
+# VentureGuard Pro
 
-VentureGuard is a Streamlit-based predictive analytics application designed to help founders and investors evaluate startup outcomes using real startup data.
+A production-style Streamlit application for startup outcome intelligence with persisted ML models, batch scoring, analytics, and prediction audit history.
 
-## Live Demo
+## Highlights
 
-Production app: https://ventureguard.streamlit.app/
+- Trained model workflow with persistent artifacts in models/
+- Modular architecture (data prep, modeling, inference, storage, UI)
+- Single startup analyzer with confidence and risk labels
+- Bulk CSV scoring with downloadable outputs
+- Model Center with metrics for classification, regression, and clustering
+- Prediction history for audit and review
+- Admin page for system and artifact health checks
 
-Best viewed on desktop. Upload `startup data.csv` to begin.
+## ML Components
 
-## What This App Does
+- Priority Classifier: SVC (RBF kernel, calibrated probabilities)
+- Effort Estimator: Polynomial Regression
+- Startup Segmentation: K-Means with silhouette-based k selection
 
-- Cleans and validates uploaded startup CSV data
-- Performs exploratory data analysis (EDA) with interactive visualizations
-- Trains and compares classification models:
-  - KNN
-  - Decision Tree
-  - Naive Bayes
-  - SVM
-- Reports holdout metrics and 5-fold cross-validation metrics (Accuracy, F1, ROC-AUC)
-- Recommends the best model by CV ROC-AUC
-- Runs regression analysis (Linear and Polynomial)
-- Provides K-Means clustering analysis
-- Supports interactive startup outcome prediction
-- Allows export of classification metrics as CSV
+## Application Pages
 
-## Tech Stack
+- Dashboard
+- Startup Analyzer
+- Bulk Upload
+- Analytics
+- Model Center
+- Clusters
+- Prediction History
+- Admin Panel
 
-- Python
-- Streamlit
-- Pandas, NumPy
-- Matplotlib, Seaborn
-- Scikit-learn
+## Quick Start
 
-## Repository Structure
-
-- `app.py` - Main Streamlit application
-- `requirements.txt` - Python dependencies
-- `runtime.txt` - Python version for Streamlit Cloud
-- `assets/` - README screenshots
-- `README.md` - Project documentation
-- `.gitignore` - Git ignore rules
-
-## Run Locally
-
-1. Create and activate a virtual environment.
-2. Install dependencies:
+1. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Launch the app:
+2. Run Streamlit app
 
 ```bash
 streamlit run app.py
 ```
 
-## Deployment (Streamlit Community Cloud)
+App URL: http://localhost:8501
 
-1. Push this repository to GitHub.
-2. Open Streamlit Community Cloud.
-3. Create a new app and select this repository.
-4. Set branch to `main`.
-5. Set main file path to `app.py`.
-6. Deploy.
+## Training Workflow
 
-## Screenshots
+You can train from inside the app, or from CLI.
 
-### Home Page
+### Option A: In-App
 
-![Home](assets/home.png)
+- Upload your startup CSV from the sidebar
+- Click Train / Retrain Models
+- Artifacts are saved automatically under models/
 
-### Classification Page
+### Option B: CLI
 
-![Classification](assets/classification.png)
+```bash
+python -m src.train_models --input data/processed/startup_clean.csv
+```
 
-## Dataset Requirement
+You can point --input to any valid source CSV.
 
-The uploaded dataset must include a `status` column (with values such as `acquired` and `closed`) along with relevant startup feature columns used for modeling.
+## Expected Dataset Notes
 
-## Limitations
+The dataset should include status values like acquired and closed, plus startup feature columns such as:
 
-- Model outcomes are predictive and should not be treated as causal conclusions.
-- Performance depends heavily on the quality and representativeness of the uploaded dataset.
-- Results can vary across regions, sectors, and time periods not well represented in the data.
+- funding_rounds
+- funding_total_usd
+- milestones
+- relationships
+- avg_participants
+- age_first_funding_year
+- age_last_funding_year
+- has_VC
+- has_angel
+- is_software
+- is_web
+- is_mobile
 
-## Author
+## Project Structure
 
-Built by Varad Miwale
+```text
+Startup Predictor/
+├── app.py
+├── requirements.txt
+├── runtime.txt
+├── README.md
+├── .streamlit/
+│   └── config.toml
+├── data/
+│   ├── raw/
+│   └── processed/
+│       ├── startup_clean.csv
+│       └── prediction_history.csv
+├── models/
+│   ├── priority_model.joblib
+│   ├── effort_model.joblib
+│   ├── cluster_model.joblib
+│   └── model_metrics.json
+├── src/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── data_prep.py
+│   ├── modeling.py
+│   ├── inference.py
+│   ├── model_store.py
+│   ├── history_store.py
+│   ├── ui.py
+│   └── train_models.py
+├── notebooks/
+└── assets/
+```
+
+## Production Notes
+
+- Model artifacts are versionable and can be retrained independently.
+- The app can load from uploaded data or fallback processed data.
+- Prediction history is persisted to CSV for traceability.
+
+## Version
+
+- Version: 2.0.0
+- Status: Interview-ready modular architecture
