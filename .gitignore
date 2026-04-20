@@ -16,6 +16,15 @@ env/
 # Local Streamlit secrets
 .streamlit/secrets.toml
 
+# Local runtime logs
+*.log
+
+# Generated local artifacts
+data/processed/startup_clean.csv
+data/processed/prediction_history.csv
+models/*.joblib
+models/model_metrics.json
+
 # OS files
 .DS_Store
 Thumbs.db

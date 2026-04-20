@@ -32,8 +32,8 @@ from src.ui import inject_global_css, kpi_card, title_block
 
 
 st.set_page_config(
-    page_title="VentureGuard Pro",
-    page_icon="V",
+    page_title="Startup Predictor",
+    page_icon="S",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -96,8 +96,8 @@ def status_badge(label: str) -> str:
 
 
 with st.sidebar:
-    st.markdown("## VentureGuard Pro")
-    st.caption("Production-style startup intelligence suite")
+    st.markdown("## Startup Predictor")
+    st.caption("Predict startup outcomes with ML insights")
 
     page = st.radio(
         "Navigate",
