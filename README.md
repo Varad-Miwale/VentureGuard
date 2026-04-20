@@ -11,7 +11,7 @@ Startup Predictor is a Streamlit application that estimates startup outcomes usi
 	- Clustering for startup segmentation
 - Model artifacts saved to disk so the app can reuse trained models
 - In-app training and a CLI training command
-- Admin and model health views for quick checks
+- Model health and artifact status checks in Model Center
 
 ## Tech Stack
 

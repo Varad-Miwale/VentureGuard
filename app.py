@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import streamlit as st
 from sklearn.decomposition import PCA
 
@@ -98,6 +95,27 @@ def status_badge(label: str) -> str:
     return "badge-risk"
 
 
+def feature_label(name: str) -> str:
+    return name.replace("_", " ").title()
+
+
+def artifact_status_table() -> pd.DataFrame:
+    items = [
+        ("cleaned_dataset", CLEAN_DATA_PATH.exists()),
+        ("priority_model", PRIORITY_MODEL_PATH.exists()),
+        ("effort_model", EFFORT_MODEL_PATH.exists()),
+        ("cluster_model", CLUSTER_MODEL_PATH.exists()),
+        ("metrics_json", METRICS_PATH.exists()),
+        ("prediction_history", HISTORY_PATH.exists()),
+    ]
+    return pd.DataFrame(
+        {
+            "artifact": [name for name, _ in items],
+            "status": ["Available" if exists else "Missing" for _, exists in items],
+        }
+    )
+
+
 def build_csv_template() -> bytes:
     template = pd.DataFrame([{**{c: 0 for c in FEATURE_COLUMNS}, "status": "acquired"}])
     return template.to_csv(index=False).encode("utf-8")
@@ -117,7 +135,6 @@ with st.sidebar:
             "Model Center",
             "Clusters",
             "Prediction History",
-            "Admin Panel",
         ],
     )
 
@@ -162,6 +179,9 @@ with st.sidebar:
     else:
         st.success("Models available")
 
+    if data is not None:
+        st.caption(f"Training rows: {len(data):,}")
+
     if data_source == "demo":
         st.info("Using bundled demo data. Upload your own CSV for custom training.")
 
@@ -178,10 +198,10 @@ with st.sidebar:
 
 
 if page == "Dashboard":
-    title_block("Dashboard", "SaaS-like intelligence overview for startup outcome prediction")
+    title_block("Dashboard", "Overview of data health and startup outcome signals")
 
     if data is None:
-        st.warning("No cleaned dataset available. Upload a dataset to begin.")
+        st.warning("No dataset available yet. Upload a CSV from the sidebar to begin.")
         st.stop()
 
     c1, c2, c3, c4 = st.columns(4)
@@ -247,7 +267,7 @@ elif page == "Startup Analyzer":
     for idx, col in enumerate(features):
         with cols[idx % 3]:
             values[col] = st.number_input(
-                label=col,
+                label=feature_label(col),
                 value=float(defaults[col]),
                 step=1.0,
                 format="%.4f",
@@ -347,7 +367,10 @@ elif page == "Analytics":
 
 
 elif page == "Model Center":
-    title_block("Model Center", "Model health, evaluation metrics and artifact metadata")
+    title_block("Model Center", "Model metrics and system artifact health")
+
+    st.markdown("### Artifact Status")
+    st.dataframe(artifact_status_table(), use_container_width=True)
 
     if METRICS_PATH.exists():
         metrics = load_json(METRICS_PATH)
@@ -373,6 +396,9 @@ elif page == "Model Center":
         cm_df = pd.DataFrame(cm, columns=["Pred Closed", "Pred Acquired"], index=["Actual Closed", "Actual Acquired"])
         st.markdown("### Confusion Matrix")
         st.dataframe(cm_df, use_container_width=True)
+
+        with st.expander("Raw Metrics JSON"):
+            st.json(metrics)
     else:
         st.warning("No saved model metrics found yet.")
 
@@ -439,42 +465,3 @@ elif page == "Prediction History":
 
     st.write(f"Records: {len(filtered)}")
     st.dataframe(filtered.sort_values("predicted_at", ascending=False), use_container_width=True)
-
-
-elif page == "Admin Panel":
-    title_block("Admin Panel", "System health, artifact status and operational checks")
-
-    status_table = pd.DataFrame(
-        {
-            "artifact": [
-                "cleaned_dataset",
-                "priority_model",
-                "effort_model",
-                "cluster_model",
-                "metrics_json",
-                "prediction_history",
-            ],
-            "exists": [
-                CLEAN_DATA_PATH.exists(),
-                PRIORITY_MODEL_PATH.exists(),
-                EFFORT_MODEL_PATH.exists(),
-                CLUSTER_MODEL_PATH.exists(),
-                METRICS_PATH.exists(),
-                HISTORY_PATH.exists(),
-            ],
-        }
-    )
-
-    st.dataframe(status_table, use_container_width=True)
-
-    st.markdown("### Quick Commands")
-    st.code(
-        """pip install -r requirements.txt
-python -m src.train_models --input data/processed/startup_clean.csv
-streamlit run app.py""",
-        language="bash",
-    )
-
-    if METRICS_PATH.exists():
-        st.markdown("### Last Saved Metrics")
-        st.json(load_json(METRICS_PATH))
