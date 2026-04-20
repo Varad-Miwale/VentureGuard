@@ -12,9 +12,12 @@ from sklearn.decomposition import PCA
 from src.config import (
     CLEAN_DATA_PATH,
     CLUSTER_MODEL_PATH,
+    FEATURE_COLUMNS,
     EFFORT_MODEL_PATH,
+    HISTORY_PATH,
     METRICS_PATH,
     PRIORITY_MODEL_PATH,
+    RAW_DIR,
 )
 from src.data_prep import (
     clean_dataset,
@@ -95,6 +98,11 @@ def status_badge(label: str) -> str:
     return "badge-risk"
 
 
+def build_csv_template() -> bytes:
+    template = pd.DataFrame([{**{c: 0 for c in FEATURE_COLUMNS}, "status": "acquired"}])
+    return template.to_csv(index=False).encode("utf-8")
+
+
 with st.sidebar:
     st.markdown("## Startup Predictor")
     st.caption("Predict startup outcomes with ML insights")
@@ -117,18 +125,32 @@ with st.sidebar:
     st.markdown("### Training Source")
     uploaded = st.file_uploader("Upload startup CSV", type=["csv"])
 
+    st.download_button(
+        "Download CSV Template",
+        data=build_csv_template(),
+        file_name="startup_template.csv",
+        mime="text/csv",
+        use_container_width=True,
+    )
+
     if uploaded is not None:
         st.success("Dataset uploaded.")
 
 
 data = None
+data_source = None
 if uploaded is not None:
     try:
         data = load_clean_data(uploaded)
+        data_source = "uploaded"
     except Exception as exc:
         st.error(f"Failed to read uploaded dataset: {exc}")
 elif CLEAN_DATA_PATH.exists():
     data = load_clean_data(CLEAN_DATA_PATH)
+    data_source = "processed"
+elif (RAW_DIR / "demo_startups.csv").exists():
+    data = load_clean_data(RAW_DIR / "demo_startups.csv")
+    data_source = "demo"
 
 bundles = load_model_bundles()
 
@@ -140,11 +162,17 @@ with st.sidebar:
     else:
         st.success("Models available")
 
+    if data_source == "demo":
+        st.info("Using bundled demo data. Upload your own CSV for custom training.")
+
     if data is not None:
         if st.button("Train / Retrain Models", use_container_width=True):
-            with st.spinner("Training all models and persisting artifacts..."):
-                bundles = train_and_persist_models(data)
-            st.success("Training complete. Models saved in models/.")
+            try:
+                with st.spinner("Training all models and persisting artifacts..."):
+                    bundles = train_and_persist_models(data)
+                st.success("Training complete. Models saved in models/.")
+            except Exception as exc:
+                st.error(f"Training failed: {exc}")
     else:
         st.info("Upload data or keep data/processed/startup_clean.csv to train.")
 
@@ -432,7 +460,7 @@ elif page == "Admin Panel":
                 EFFORT_MODEL_PATH.exists(),
                 CLUSTER_MODEL_PATH.exists(),
                 METRICS_PATH.exists(),
-                Path("data/processed/prediction_history.csv").exists(),
+                HISTORY_PATH.exists(),
             ],
         }
     )
