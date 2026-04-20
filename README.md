@@ -1,37 +1,43 @@
 # VentureGuard
 
-VentureGuard is an interactive Streamlit app for startup risk analytics.
-It helps founders and investors analyze startup outcomes and estimate whether a startup is more likely to be **Acquired** or **Closed**.
+VentureGuard is a Streamlit-based predictive analytics application designed to help founders and investors evaluate startup outcomes using real startup data.
 
-## Live App
+## Live Demo
 
-https://ventureguard.streamlit.app/
+Production app: https://ventureguard.streamlit.app/
 
-Built by Varad Miwale
+## What This App Does
 
-## Features
-
-- Clean and modern Streamlit interface
-- Upload your own CSV dataset
-- Data cleaning and validation checks
-- EDA visualizations
-- Classification models:
+- Cleans and validates uploaded startup CSV data
+- Performs exploratory data analysis (EDA) with interactive visualizations
+- Trains and compares classification models:
   - KNN
   - Decision Tree
   - Naive Bayes
   - SVM
-- 5-fold cross-validation metrics (Accuracy, F1, ROC-AUC)
-- Best model recommendation based on CV ROC-AUC
-- Regression analysis (Linear and Polynomial)
-- Interactive startup prediction page
-- Downloadable classification metrics report
+- Reports holdout metrics and 5-fold cross-validation metrics (Accuracy, F1, ROC-AUC)
+- Recommends the best model by CV ROC-AUC
+- Runs regression analysis (Linear and Polynomial)
+- Provides K-Means clustering analysis
+- Supports interactive startup outcome prediction
+- Allows export of classification metrics as CSV
 
-## Project Structure
+## Tech Stack
 
-- `app.py`: Main Streamlit application
-- `requirements.txt`: Python dependencies
-- `runtime.txt`: Python runtime version for deployment
-- `.gitignore`: Files and folders to ignore in git
+- Python
+- Streamlit
+- Pandas, NumPy
+- Matplotlib, Seaborn
+- Scikit-learn
+
+## Repository Structure
+
+- `app.py` - Main Streamlit application
+- `requirements.txt` - Python dependencies
+- `runtime.txt` - Python version for Streamlit Cloud
+- `assets/` - README screenshots
+- `README.md` - Project documentation
+- `.gitignore` - Git ignore rules
 
 ## Run Locally
 
@@ -42,19 +48,20 @@ Built by Varad Miwale
 pip install -r requirements.txt
 ```
 
-3. Start the app:
+3. Launch the app:
 
 ```bash
 streamlit run app.py
 ```
 
-## Deploy on Streamlit Community Cloud
+## Deployment (Streamlit Community Cloud)
 
 1. Push this repository to GitHub.
 2. Open Streamlit Community Cloud.
-3. Click **New app**.
-4. Select the repository, branch, and `app.py` as the entry file.
-5. Deploy.
+3. Create a new app and select this repository.
+4. Set branch to `main`.
+5. Set main file path to `app.py`.
+6. Deploy.
 
 ## Screenshots
 
@@ -66,6 +73,10 @@ streamlit run app.py
 
 ![Classification](assets/classification.png)
 
-## Dataset Note
+## Dataset Requirement
 
-This app expects a startup dataset that includes a `status` column with values such as `acquired` and `closed`, plus relevant numeric feature columns.
+The uploaded dataset must include a `status` column (with values such as `acquired` and `closed`) along with relevant startup feature columns used for modeling.
+
+## Author
+
+Built by Varad Miwale
