@@ -51,6 +51,32 @@ def inject_global_css() -> None:
             opacity: 1 !important;
         }
 
+        [data-testid='stSidebar'] .stButton > button,
+        [data-testid='stSidebar'] .stDownloadButton > button {
+            width: 100%;
+            background: #1e293b !important;
+            color: #f8fafc !important;
+            border: 1px solid #334155 !important;
+            border-radius: 10px !important;
+            font-weight: 600 !important;
+        }
+
+        [data-testid='stSidebar'] .stButton > button:hover,
+        [data-testid='stSidebar'] .stDownloadButton > button:hover {
+            background: #334155 !important;
+            color: #ffffff !important;
+            border-color: #475569 !important;
+        }
+
+        [data-testid='stSidebar'] .stButton > button:disabled,
+        [data-testid='stSidebar'] .stDownloadButton > button:disabled {
+            background: #1f2937 !important;
+            color: #cbd5e1 !important;
+            border: 1px solid #374151 !important;
+            opacity: 1 !important;
+            cursor: not-allowed !important;
+        }
+
         .page-title {
             font-family: 'IBM Plex Mono', monospace;
             font-size: 1.9rem;
