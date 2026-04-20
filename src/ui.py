@@ -23,6 +23,34 @@ def inject_global_css() -> None:
             color: #e2e8f0 !important;
         }
 
+        [data-testid='stSidebar'] [data-testid='stFileUploaderDropzone'] {
+            background: #0b1220 !important;
+            border: 1px dashed #334155 !important;
+            border-radius: 12px !important;
+        }
+
+        [data-testid='stSidebar'] [data-testid='stFileUploaderDropzone'] * {
+            color: #cbd5e1 !important;
+        }
+
+        [data-testid='stSidebar'] [data-testid='stFileUploaderDropzone'] button {
+            background: #1e293b !important;
+            color: #f8fafc !important;
+            border: 1px solid #334155 !important;
+        }
+
+        [data-testid='stSidebar'] [data-testid='stFileUploaderDropzone'] button:hover {
+            background: #334155 !important;
+            color: #ffffff !important;
+        }
+
+        [data-testid='stSidebar'] [data-testid='stFileUploaderDropzone'] button:disabled {
+            background: #1f2937 !important;
+            color: #94a3b8 !important;
+            border: 1px solid #374151 !important;
+            opacity: 1 !important;
+        }
+
         .page-title {
             font-family: 'IBM Plex Mono', monospace;
             font-size: 1.9rem;
