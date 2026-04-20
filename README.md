@@ -3,6 +3,12 @@
 VentureGuard is an interactive Streamlit app for startup risk analytics.
 It helps founders and investors analyze startup outcomes and estimate whether a startup is more likely to be **Acquired** or **Closed**.
 
+## Live App
+
+https://ventureguard.streamlit.app/
+
+Built by Varad Miwale
+
 ## Features
 
 - Clean and modern Streamlit interface
@@ -52,17 +58,13 @@ streamlit run app.py
 
 ## Screenshots
 
-Add screenshots after deployment:
+### Home Page
 
-- Home page screenshot
-- Classification page screenshot
-
-Example markdown:
-
-```md
 ![Home](assets/home.png)
+
+### Classification Page
+
 ![Classification](assets/classification.png)
-```
 
 ## Dataset Note
 
