@@ -6,6 +6,8 @@ VentureGuard is a Streamlit-based predictive analytics application designed to h
 
 Production app: https://ventureguard.streamlit.app/
 
+Best viewed on desktop. Upload `startup data.csv` to begin.
+
 ## What This App Does
 
 - Cleans and validates uploaded startup CSV data
@@ -76,6 +78,12 @@ streamlit run app.py
 ## Dataset Requirement
 
 The uploaded dataset must include a `status` column (with values such as `acquired` and `closed`) along with relevant startup feature columns used for modeling.
+
+## Limitations
+
+- Model outcomes are predictive and should not be treated as causal conclusions.
+- Performance depends heavily on the quality and representativeness of the uploaded dataset.
+- Results can vary across regions, sectors, and time periods not well represented in the data.
 
 ## Author
 
