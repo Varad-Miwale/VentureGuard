@@ -99,6 +99,10 @@ def feature_label(name: str) -> str:
     return name.replace("_", " ").title()
 
 
+def outcome_label(status: str) -> str:
+    return "Successful" if str(status).lower() == "acquired" else "Not Successful"
+
+
 def artifact_status_table() -> pd.DataFrame:
     items = [
         ("cleaned_dataset", CLEAN_DATA_PATH.exists()),
@@ -323,12 +327,100 @@ elif page == "Bulk Upload":
                 bundles["effort"],
                 bundles["cluster"],
             )
-            st.success("Batch scoring complete")
-            st.dataframe(results.head(20), use_container_width=True)
-
+            st.session_state["bulk_results"] = results
             append_predictions(results.to_dict(orient="records"))
+            st.success("Batch scoring complete")
 
-            csv = results.to_csv(index=False).encode("utf-8")
+    results = st.session_state.get("bulk_results")
+    if isinstance(results, pd.DataFrame) and not results.empty:
+        display = results.copy()
+        display["final_outcome"] = display["predicted_status"].apply(outcome_label)
+
+        total = len(display)
+        success_count = int((display["predicted_status"] == "Acquired").sum())
+        not_success_count = total - success_count
+        success_rate = (success_count / total) * 100
+        not_success_rate = (not_success_count / total) * 100
+        avg_confidence = float(display["confidence"].mean() * 100)
+        high_risk_count = int(display["risk_level"].isin(["Critical", "High"]).sum())
+
+        st.markdown("### Final Outcome Summary (Next 12 to 18 Months)")
+        s1, s2, s3, s4, s5 = st.columns(5)
+        s1.metric("Total Startups", f"{total:,}")
+        s2.metric("Predicted Successful", f"{success_count} ({success_rate:.1f}%)")
+        s3.metric("Predicted Not Successful", f"{not_success_count} ({not_success_rate:.1f}%)")
+        s4.metric("Average Confidence", f"{avg_confidence:.1f}%")
+        s5.metric("High/Critical Risk", str(high_risk_count))
+
+        st.caption(
+            "This summary estimates likely startup outcomes for the next 12 to 18 months "
+            "based on the uploaded profile features."
+        )
+
+        st.markdown("### Filter Results")
+        f1, f2 = st.columns(2)
+        with f1:
+            status_filter = st.selectbox(
+                "Final Outcome",
+                ["All", "Successful", "Not Successful"],
+                key="bulk_status_filter",
+            )
+        with f2:
+            risk_filter = st.selectbox(
+                "Risk Level",
+                ["All", "Critical", "High", "Medium", "Low"],
+                key="bulk_risk_filter",
+            )
+
+        filtered = display.copy()
+        if status_filter != "All":
+            filtered = filtered[filtered["final_outcome"] == status_filter]
+        if risk_filter != "All":
+            filtered = filtered[filtered["risk_level"] == risk_filter]
+
+        st.write(f"Filtered records: {len(filtered):,}")
+
+        if filtered.empty:
+            st.info("No records match the selected filters.")
+        else:
+            result_view = filtered.copy()
+            result_view["confidence"] = (result_view["confidence"] * 100).round(2)
+
+            preferred_cols = [
+                "final_outcome",
+                "confidence",
+                "risk_level",
+                "effort_estimate",
+                "segment",
+            ]
+            other_cols = [c for c in result_view.columns if c not in preferred_cols + ["predicted_status"]]
+            ordered_cols = preferred_cols + other_cols
+
+            st.dataframe(result_view[ordered_cols], use_container_width=True)
+
+            detail = filtered.reset_index(drop=True)
+            selected_idx = st.number_input(
+                "Select row index for detail view",
+                min_value=0,
+                max_value=len(detail) - 1,
+                value=0,
+                step=1,
+            )
+            selected = detail.iloc[int(selected_idx)]
+
+            st.markdown("### Selected Startup Final Outcome")
+            badge_class = status_badge(str(selected["predicted_status"]))
+            st.markdown(
+                f"<div class='{badge_class}'>{selected['final_outcome']}</div>",
+                unsafe_allow_html=True,
+            )
+            d1, d2, d3 = st.columns(3)
+            d1.metric("Confidence", f"{float(selected['confidence']) * 100:.2f}%")
+            d2.metric("Risk Level", str(selected["risk_level"]))
+            d3.metric("Segment", f"Cluster {int(selected['segment'])}")
+            st.metric("Estimated Resource Intensity (USD)", f"${float(selected['effort_estimate']):,.2f}")
+
+            csv = result_view.to_csv(index=False).encode("utf-8")
             st.download_button(
                 "Download Predictions CSV",
                 data=csv,
