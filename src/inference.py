@@ -29,6 +29,7 @@ def predict_single_startup(
     priority_scaled = priority_bundle["scaler"].transform(priority_features)
     prob = float(priority_bundle["model"].predict_proba(priority_scaled)[0, 1])
     label = "Acquired" if prob >= 0.5 else "Closed"
+    confidence = prob if label == "Acquired" else (1.0 - prob)
 
     effort_value = float(effort_bundle["model"].predict(effort_features)[0])
 
@@ -37,7 +38,7 @@ def predict_single_startup(
 
     return {
         "predicted_status": label,
-        "confidence": round(prob, 4),
+        "confidence": round(confidence, 4),
         "risk_level": risk_level(1.0 - prob),
         "effort_estimate": round(max(0.0, effort_value), 2),
         "segment": segment,
@@ -58,6 +59,7 @@ def predict_bulk(
     prob = priority_bundle["model"].predict_proba(p_scaled)[:, 1]
 
     status = np.where(prob >= 0.5, "Acquired", "Closed")
+    confidence = np.where(status == "Acquired", prob, 1.0 - prob)
     effort = effort_bundle["model"].predict(e_features)
 
     c_scaled = cluster_bundle["scaler"].transform(c_features)
@@ -65,7 +67,7 @@ def predict_bulk(
 
     out = frame.copy()
     out["predicted_status"] = status
-    out["confidence"] = prob.round(4)
+    out["confidence"] = confidence.round(4)
     out["risk_level"] = [risk_level(1.0 - p) for p in prob]
     out["effort_estimate"] = np.maximum(0.0, effort).round(2)
     out["segment"] = seg
